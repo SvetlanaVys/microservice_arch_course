@@ -1,0 +1,30 @@
+package com.svysk.song_service.config;
+
+import com.svysk.openapi.ApiClient;
+import com.svysk.openapi.client.ResourcesApi;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
+
+@Configuration
+public class RestClientConfig {
+
+    @Bean
+    public RestClient restClient(@Value("${resource-srv.url}") String url) {
+
+        return RestClient.builder()
+                .baseUrl(url)
+                .build();
+    }
+
+    @Bean
+    public ApiClient apiClient(RestClient restClient) {
+        return new ApiClient(restClient);
+    }
+
+    @Bean
+    public ResourcesApi songsApi(ApiClient apiClient) {
+        return new ResourcesApi(apiClient);
+    }
+}

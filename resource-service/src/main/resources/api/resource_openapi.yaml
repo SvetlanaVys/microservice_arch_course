@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: MP3 Resource API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /resources:
+    post:
+      summary: Uploads a new MP3 resource.
+      operationId: uploadAudio
+      requestBody:
+        required: true
+        content:
+          audio/mpeg:
+            schema:
+              type: string
+              format: binary
+              description: Returns the ID of the successfully created resource
+      responses:
+        '200':
+          description: Audio file uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadResourceResponse'
+        '400':
+          description: The request body is invalid MP3
+        '500':
+          description: An error occured on the server
+    delete:
+      summary: Delete spesified resources by their IDs. If a resource does not exist, it is ignored without causing an error.
+      operationId: deleteAudioResources
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Comma-separated list of resource IDs to remove.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Request successful, resources deleted as specified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteResourceResponse'
+        '400':
+          description: CSV string format is invalid or exceeds length restrictions
+        '500':
+          description: An error occured on the server
+  /resources/{id}:
+    get:
+      summary: Retrieves the binary audio data of a resource
+      operationId: getAudio
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the resource to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Returns the audio bytes (MP3 file) for the specified resource
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: The provided ID is invalid (e.g., contains letters, decimals, is negative, or zero)
+        '404':
+          description: Resource with the specified ID does not exist
+        '500':
+          description: An error occured on the server
+  /resources/{id}/exists:
+    get:
+      summary: Check if resource exists
+      operationId: resourceExists
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Resource ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Resource existence
+          content:
+            application/json:
+              schema:
+                type: boolean
+                example: true
+        '400':
+          description: Invalid resource ID
+        '500':
+          description: Internal server error
+
+components:
+  schemas:
+    UploadResourceResponse:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The ID of the created resource
+    DeleteResourceResponse:
+      type: object
+      required:
+        - id
+      properties:
+        ids:
+          type: array
+          description: Returns an array of the IDs of successfully deleted resources
+          items:
+            type: integer
+            format: int64
