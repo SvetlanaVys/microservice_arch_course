@@ -14,7 +14,7 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<name>resource-service</name>
 	<description>MP3 Resource Service</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
 		<spring-ai.version>2.0.0</spring-ai.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 	</properties>

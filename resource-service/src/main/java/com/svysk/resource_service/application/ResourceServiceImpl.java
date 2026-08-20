@@ -1,7 +1,6 @@
 package com.svysk.resource_service.application;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.svysk.openapi.client.SongsApi;
 import com.svysk.openapi.dto.SongMetadataRecordDto;

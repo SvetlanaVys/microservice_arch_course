@@ -10,8 +10,11 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class SongsClientConfig {
 
+    @Value("${song-srv.url}")
+    String url;
+
     @Bean
-    public RestClient restClient( @Value("${song-srv.url}") String url) {
+    public RestClient restClient() {
 
         return RestClient.builder()
                 .baseUrl(url)
@@ -20,7 +23,10 @@ public class SongsClientConfig {
 
     @Bean
     public ApiClient apiClient(RestClient restClient) {
-        return new ApiClient(restClient);
+        ApiClient apiClient = new ApiClient(restClient);
+        apiClient.setBasePath(url);
+
+        return apiClient;
     }
 
     @Bean
