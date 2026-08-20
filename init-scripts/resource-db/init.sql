@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS resource_files
+(
+	id BIGSERIAL PRIMARY KEY,
+	content_type VARCHAR(255) NOT NULL,
+	size BIGINT NOT NULL,
+	data BYTEA NOT NULL,
+	created_at TIMESTAMP NOT NULL
+);
