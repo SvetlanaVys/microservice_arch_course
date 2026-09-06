@@ -22,6 +22,12 @@ services:
     volumes:
       - ./init-scripts/song-db:/docker-entrypoint-initdb.d:ro
 
+  eureka-server:
+    build:
+      context: ./eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "8761:8761"
   resource-service:
     build:
       context: ./resource-service
@@ -33,23 +39,29 @@ services:
       SPRING_DATASOURCE_URL: ${RESOURCE_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${RESOURCE_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${RESOURCE_DB_PASSWORD}
+      EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
       SONG_SERVICE_URL: ${SONG_SERVICE_URL}
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     depends_on:
       - resource-db
+      - eureka-server
 
   song-service:
     build:
       context: ./song-service
       dockerfile: Dockerfile
+    deploy:
+      replicas: 2
     ports:
-      - "8081:8081"
-      - "5006:5006"
+      - "8082-8083:8082"
+      - "5006-5007:5006"
     environment:
       SPRING_DATASOURCE_URL: ${SONG_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${SONG_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${SONG_DB_PASSWORD}
+      EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
       RESOURCE_SERVICE_URL: ${RESOURCE_SERVICE_URL}
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     depends_on:
       - song-db
+      - eureka-server

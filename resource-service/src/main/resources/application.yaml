@@ -15,5 +15,15 @@ spring:
       ddl-auto: none
     show-sql: true
 
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVER_URL:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5
+  instance:
+    lease-renewal-interval-in-seconds: 5
+
 song-srv:
-  url: ${SONG_SERVICE_URL:http://localhost:8081}
+  url: ${SONG_SERVICE_URL:http://song-service}

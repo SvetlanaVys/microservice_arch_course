@@ -2,9 +2,12 @@ package com.svysk.resource_service.config;
 
 import com.svysk.openapi.ApiClient;
 import com.svysk.openapi.client.SongsApi;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestClient;
 
 @Configuration
@@ -14,9 +17,23 @@ public class SongsClientConfig {
     String url;
 
     @Bean
-    public RestClient restClient() {
+    @Primary
+    public RestClient.Builder restClientBuilder() {
+        return RestClient.builder();
+    }
 
-        return RestClient.builder()
+    @Bean
+    @LoadBalanced
+    public RestClient.Builder loadBalancedRestClientBuilder() {
+        return RestClient.builder();
+    }
+
+    @Bean
+    public RestClient restClient(
+            @Qualifier("loadBalancedRestClientBuilder")
+            RestClient.Builder restClientBuilder) {
+
+        return restClientBuilder
                 .baseUrl(url)
                 .build();
     }
