@@ -9,7 +9,7 @@ public interface ResourceRepository {
 
     Optional<MP3Resource> findById(Long id);
 
-    List<Long> findByIds(List<Long> ids);
+    List<MP3Resource> findByIds(List<Long> ids);
 
     Optional<MP3Resource> save(MP3Resource audioFile);
 

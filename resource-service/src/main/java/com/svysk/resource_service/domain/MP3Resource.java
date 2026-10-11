@@ -9,6 +9,7 @@ public class MP3Resource {
 
     private Long id;
     private String contentType;
+    private String filePath;
     private Long size;
     private byte[] data;
     private LocalDateTime createdAt;

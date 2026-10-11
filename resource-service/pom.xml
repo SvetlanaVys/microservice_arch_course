@@ -18,6 +18,7 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<spring-ai.version>2.0.0</spring-ai.version>
 		<org.mapstruct.version>1.6.3</org.mapstruct.version>
 		<spring-cloud.version>2025.1.2</spring-cloud.version>
+		<software-amazon-awssdk>2.31.54</software-amazon-awssdk>
 	</properties>
 	<dependencies>
 		<!-- Spring Web -->
@@ -72,6 +73,11 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>${software-amazon-awssdk}</version>
 		</dependency>
 	</dependencies>
 	<dependencyManagement>
