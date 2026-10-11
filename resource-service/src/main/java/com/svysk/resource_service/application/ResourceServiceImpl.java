@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 
 import com.svysk.openapi.client.SongsApi;
-import com.svysk.openapi.dto.SongMetadataRecordDto;
 import com.svysk.resource_service.adapters.s3.impl.S3FIleStorageAdapter;
 import com.svysk.resource_service.controller.error_handler.ResourceIdsTooLongExcepion;
 import org.springframework.stereotype.Service;
@@ -26,7 +25,6 @@ public class ResourceServiceImpl implements ResourceService {
 
     private final ResourceRepository repository;
     private final S3FIleStorageAdapter s3FIleStorage;
-    private final AudioMetadataService audioMetadataService;
     private final SongsApi songsApi;
 
     @Override
