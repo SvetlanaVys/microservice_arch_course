@@ -48,7 +48,7 @@ public class ResourceController implements ResourcesApi {
     @Override
     public ResponseEntity<Boolean> resourceExists(Long id) {
 
-        return ResponseEntity.ok(service.isExists(id));
+        return ResponseEntity.ok(service.existsById(id));
     }
 
     @Override

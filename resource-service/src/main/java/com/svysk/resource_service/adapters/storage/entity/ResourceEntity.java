@@ -27,8 +27,8 @@ public class ResourceEntity {
     @Column(nullable = false)
     private Long size;
 
-    @Column(columnDefinition = "BYTEA", nullable = false)
-    private byte[] data;
+    @Column(name = "file_path", nullable = false)
+    private String filePath;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
