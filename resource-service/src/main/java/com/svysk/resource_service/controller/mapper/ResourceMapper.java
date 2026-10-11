@@ -21,7 +21,7 @@ public interface ResourceMapper {
             MP3Resource mp3Resource = new MP3Resource();
 
             mp3Resource.setSize(resource.contentLength());
-            mp3Resource.setContentType("audio/mpeg"); // TODO
+            mp3Resource.setContentType("audio/mpeg");
             mp3Resource.setData(resource.getContentAsByteArray());
             mp3Resource.setCreatedAt(LocalDateTime.now());
 
