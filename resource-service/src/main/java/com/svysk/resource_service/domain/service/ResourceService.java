@@ -8,7 +8,7 @@ public interface ResourceService {
     
     MP3Resource getById(Long id);
 
-    Boolean isExists(Long id);
+    Boolean existsById(Long id);
 
     Long upload(MP3Resource audioFile);
 

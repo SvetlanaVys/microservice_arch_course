@@ -31,11 +31,11 @@ public class ResourceRepositoryImpl implements ResourceRepository {
     }
 
     @Override
-    public List<Long> findByIds(List<Long> ids) {
+    public List<MP3Resource> findByIds(List<Long> ids) {
 
         return dResourceDao.findAllById(ids)
                 .stream()
-                .map(ResourceEntity::getId)
+                .map(resourceMapper::toResource)
                 .toList();
     }
 
