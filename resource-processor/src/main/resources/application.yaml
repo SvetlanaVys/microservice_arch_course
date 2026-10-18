@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: resource-processor
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:user}
+    password: ${RABBITMQ_PASSWORD:password}
 
 eureka:
   client:

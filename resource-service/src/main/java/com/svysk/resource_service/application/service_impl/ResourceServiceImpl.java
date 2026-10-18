@@ -1,10 +1,11 @@
-package com.svysk.resource_service.application;
+package com.svysk.resource_service.application.service_impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import com.svysk.openapi.client.SongsApi;
 import com.svysk.resource_service.adapters.s3.impl.S3FIleStorageAdapter;
+import com.svysk.resource_service.application.port.out.ResourceEventPublisher;
 import com.svysk.resource_service.controller.error_handler.ResourceIdsTooLongExcepion;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,7 @@ public class ResourceServiceImpl implements ResourceService {
 
     private final ResourceRepository repository;
     private final S3FIleStorageAdapter s3FIleStorage;
+    private final ResourceEventPublisher eventPublisher;
     private final SongsApi songsApi;
 
     @Override
@@ -71,9 +73,13 @@ public class ResourceServiceImpl implements ResourceService {
         songsApi.createSong(recordDto, RESOURCE_SERVICE);
         */
 
-        return repository.save(audioFile)
+        Long resourceId = repository.save(audioFile)
                 .map(MP3Resource::getId)
                 .orElseThrow(() -> new IllegalStateException("Failed to save audio file"));
+
+        eventPublisher.publishResourceUploaded(resourceId);
+
+        return resourceId;
     }
 
     @Override
