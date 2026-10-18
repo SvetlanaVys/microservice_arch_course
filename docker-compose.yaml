@@ -94,10 +94,14 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RESOURCE_SERVICE_URL: ${RESOURCE_SERVICE_URL}
+      SONG_SERVICE_URL: ${SONG_SERVICE_URL}
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     depends_on:
       - eureka-server
       - api-gateway
+      - resource-service
+      - song-service
 
   song-service:
     build:
@@ -113,6 +117,7 @@ services:
       - song-db
       - eureka-server
       - api-gateway
+
   rabbitmq:
     image: rabbitmq:4.3.6-management
     container_name: rabbitmq

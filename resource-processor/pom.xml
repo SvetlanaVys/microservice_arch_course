@@ -157,7 +157,7 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-            <!-- OPEN API Server -->
+            <!-- OPEN API Client -->
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -167,24 +167,68 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
                         <goals>
                             <goal>generate</goal>
                         </goals>
-                        <id>buildApi</id>
+                        <id>resServiceClient</id>
                         <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/api/res_processor_openapi.yaml</inputSpec>
-                            <generatorName>spring</generatorName>
-                            <library>spring-boot</library>
+                            <inputSpec>${project.basedir}/src/main/resources/api/res_service_openapi.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>restclient</library>
                             <modelNameSuffix>Dto</modelNameSuffix>
                             <generateApis>true</generateApis>
                             <generateModels>true</generateModels>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <configHelp>false</configHelp>
+                            <output>${project.build.directory}/generated-sources/openapi-client</output>
+
+                            <typeMappings>
+                                <typeMapping>File=Resource</typeMapping>
+                                <typeMapping>file=Resource</typeMapping>
+                                <typeMapping>binary=Resource</typeMapping>
+                            </typeMappings>
+
+                            <importMappings>
+                                <importMapping>Resource=org.springframework.core.io.Resource</importMapping>
+                            </importMappings>
+
                             <configOptions>
-                                <interfaceOnly>true</interfaceOnly>
+                                <sourceFolder>src/main/java</sourceFolder>
                                 <useBeanValidation>true</useBeanValidation>
                                 <performBeanValidation>true</performBeanValidation>
                                 <modelPackage>com.svysk.openapi.dto</modelPackage>
-                                <apiPackage>com.svysk.openapi.api</apiPackage>
+                                <apiPackage>com.svysk.openapi.client</apiPackage>
+                                <invokerPackage>com.svysk.openapi</invokerPackage>
                                 <dateLibrary>java8</dateLibrary>
-                                <useSpringBoot4>true</useSpringBoot4>
+                                <useOptional>true</useOptional>
                                 <useJakartaEe>true</useJakartaEe>
-                                <useJackson3>true</useJackson3>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <id>songClient</id>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/api/song_openapi.yaml</inputSpec>
+                            <generatorName>java</generatorName>
+                            <library>restclient</library>
+                            <modelNameSuffix>Dto</modelNameSuffix>
+                            <generateApis>true</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <configHelp>false</configHelp>
+                            <output>${project.build.directory}/generated-sources/openapi-client</output>
+                            <configOptions>
+                                <sourceFolder>src/main/java</sourceFolder>
+                                <useBeanValidation>true</useBeanValidation>
+                                <performBeanValidation>true</performBeanValidation>
+                                <modelPackage>com.svysk.openapi.dto</modelPackage>
+                                <apiPackage>com.svysk.openapi.client</apiPackage>
+                                <invokerPackage>com.svysk.openapi</invokerPackage>
+                                <dateLibrary>java8</dateLibrary>
+                                <useOptional>true</useOptional>
+                                <useJakartaEe>true</useJakartaEe>
                             </configOptions>
                         </configuration>
                     </execution>

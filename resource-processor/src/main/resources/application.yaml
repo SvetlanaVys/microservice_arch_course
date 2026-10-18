@@ -20,3 +20,9 @@ eureka:
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 5
+
+song-srv:
+  url: ${SONG_SERVICE_URL:http://song-service}
+
+resource-srv:
+  url: ${RESOURCE_SERVICE_URL:http://resource-service}
