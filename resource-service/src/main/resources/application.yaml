@@ -21,6 +21,15 @@ spring:
     username: ${RABBITMQ_USERNAME:user}
     password: ${RABBITMQ_PASSWORD:password}
 
+  cloud:
+    stream:
+      bindings:
+        resourceUploaded-out-0:
+          destination: resource.exchange
+          content-type: application/json
+          producer:
+            routingKeyExpression: "'resource.uploaded'"
+
 eureka:
   client:
     service-url:

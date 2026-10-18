@@ -10,8 +10,6 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
@@ -31,8 +29,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public DirectExchange resourceExchange() {
-        return new DirectExchange(RESOURCE_EXCHANGE, true, false);
+    public TopicExchange resourceExchange() {
+        return new TopicExchange(RESOURCE_EXCHANGE, true, false);
     }
 
     @Bean
@@ -43,7 +41,7 @@ public class RabbitMQConfig {
     @Bean
     public Binding resourceBinding(
             Queue resourceQueue,
-            DirectExchange resourceExchange
+            TopicExchange resourceExchange
     ) {
         return BindingBuilder
                 .bind(resourceQueue)

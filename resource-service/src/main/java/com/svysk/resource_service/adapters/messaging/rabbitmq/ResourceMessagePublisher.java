@@ -1,28 +1,22 @@
 package com.svysk.resource_service.adapters.messaging.rabbitmq;
 
 import com.svysk.resource_service.application.port.out.ResourceEventPublisher;
-import com.svysk.resource_service.config.RabbitMQConfig;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Component;
 
 @Component
+@RequiredArgsConstructor
 public class ResourceMessagePublisher implements ResourceEventPublisher {
 
-    private final RabbitTemplate rabbitTemplate;
-
-    public ResourceMessagePublisher(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
+    private final StreamBridge streamBridge;
 
     @Override
     public void publishResourceUploaded(Long resourceId) {
 
-        ResourceUploadedEvent event = new ResourceUploadedEvent(resourceId);
-
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.RESOURCE_EXCHANGE,
-                RabbitMQConfig.RESOURCE_ROUTING_KEY,
-                event
+        streamBridge.send(
+                "resourceUploaded-out-0",
+                new ResourceUploadedEvent(resourceId)
         );
     }
 }

@@ -9,6 +9,15 @@ spring:
     port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USERNAME:user}
     password: ${RABBITMQ_PASSWORD:password}
+  cloud:
+    stream:
+      bindings:
+        resourceUploaded-in-0:
+          destination: resource.exchange
+          group: resource.uploaded.queue
+          content-type: application/json
+          consumer:
+            bindingRoutingKey: resource.uploaded
 
 eureka:
   client:
