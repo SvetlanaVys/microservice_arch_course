@@ -1,9 +1,10 @@
 package com.svysk.resource_service.application;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import com.svysk.openapi.client.SongsApi;
-import com.svysk.openapi.dto.SongMetadataRecordDto;
+import com.svysk.resource_service.adapters.s3.impl.S3FIleStorageAdapter;
 import com.svysk.resource_service.controller.error_handler.ResourceIdsTooLongExcepion;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class ResourceServiceImpl implements ResourceService {
     private static final String RESOURCE_SERVICE = "resource-srv";
 
     private final ResourceRepository repository;
-    private final AudioMetadataService audioMetadataService;
+    private final S3FIleStorageAdapter s3FIleStorage;
     private final SongsApi songsApi;
 
     @Override
@@ -32,29 +33,47 @@ public class ResourceServiceImpl implements ResourceService {
             throw new InvalidResourceIdValueException(id);
         }
 
-        return repository.findById(id)
+        MP3Resource resource = repository.findById(id)
             .orElseThrow(() ->
                     new AudioResourceNotFoundException(id)
             );
+
+        if(!resource.getFilePath().isBlank()) {
+            byte[] fileData = s3FIleStorage.download(resource.getFilePath());
+            resource.setData(fileData);
+        }
+
+        return resource;
     }
 
     @Override
-    public Boolean isExists(Long id) {
+    public Boolean existsById(Long id) {
         return repository.existsById(id);
     }
 
     @Override
     public Long upload(MP3Resource audioFile) {
+
+        String filePath = "mp3/" + UUID.randomUUID() + ".mp3";
+        s3FIleStorage.upload(
+                filePath,
+                audioFile.getData(),
+                audioFile.getContentType()
+        );
+
+        audioFile.setFilePath(filePath);
+
+
+        /*
+        TODO: The service call has been commented out to comply with the task requirements
         SongMetadataRecordDto recordDto = audioMetadataService.extract(audioFile.getData());
-        Long createdMP3ResourceId = repository.save(audioFile)
+        recordDto.setId(createdMP3ResourceId)
+        songsApi.createSong(recordDto, RESOURCE_SERVICE);
+        */
+
+        return repository.save(audioFile)
                 .map(MP3Resource::getId)
                 .orElseThrow(() -> new IllegalStateException("Failed to save audio file"));
-
-        recordDto.setId(createdMP3ResourceId);
-
-        songsApi.createSong(recordDto, RESOURCE_SERVICE);
-
-        return createdMP3ResourceId;
     }
 
     @Override
@@ -62,11 +81,23 @@ public class ResourceServiceImpl implements ResourceService {
 
         List<Long> resourceIds = parseIds(ids);
 
-        List<Long> existingIds = repository.findByIds(resourceIds);
+        List<MP3Resource> existingResources = repository.findByIds(resourceIds);
+        List<Long> existingIds = new ArrayList<>();
 
-        repository.deleteByIds(existingIds);
+        for (MP3Resource resource: existingResources) {
+            String filePath = resource.getFilePath();
 
-        songsApi.deleteSongs(ids);
+            if(filePath != null && !filePath.isBlank()) {
+                s3FIleStorage.delete(resource.getFilePath());
+            }
+
+            existingIds.add(resource.getId());
+        }
+
+        if(!existingIds.isEmpty()) {
+            repository.deleteByIds(existingIds);
+            songsApi.deleteSongs(ids);
+        }
 
         return existingIds;
     }
