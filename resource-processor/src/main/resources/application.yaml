@@ -18,6 +18,13 @@ spring:
           content-type: application/json
           consumer:
             bindingRoutingKey: resource.uploaded
+            max-attempts: 1
+      rabbit:
+        bindings:
+          resourceUploaded-in-0:
+            consumer:
+              auto-bind-dlq: true
+
 
 eureka:
   client:

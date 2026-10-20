@@ -80,6 +80,7 @@ services:
       - minio
       - eureka-server
       - api-gateway
+      - rabbitmq
 
   resource-processor:
     build:
@@ -102,6 +103,7 @@ services:
       - api-gateway
       - resource-service
       - song-service
+      - rabbitmq
 
   song-service:
     build:
