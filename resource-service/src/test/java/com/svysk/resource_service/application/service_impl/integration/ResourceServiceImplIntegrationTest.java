@@ -1,4 +1,4 @@
-package com.svysk.resource_service.application.service_impl;
+package com.svysk.resource_service.application.service_impl.integration;
 
 import com.svysk.resource_service.application.port.out.ResourceEventPublisher;
 import com.svysk.resource_service.domain.MP3Resource;
