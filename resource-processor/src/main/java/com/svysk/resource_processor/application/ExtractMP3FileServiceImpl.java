@@ -4,6 +4,7 @@ import com.svysk.openapi.dto.SongMetadataRecordDto;
 import com.svysk.resource_processor.controller.error_handler.InvalidAudioFileException;
 import com.svysk.resource_processor.domain.SongDataRecord;
 import com.svysk.resource_processor.domain.service.ExtractMP3FileService;
+import org.apache.tika.metadata.HttpHeaders;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
 import org.apache.tika.metadata.XMPDM;
@@ -31,6 +32,12 @@ public class ExtractMP3FileServiceImpl implements ExtractMP3FileService {
                     metadata,
                     new ParseContext()
             );
+
+            String contentType = metadata.get(HttpHeaders.CONTENT_TYPE);
+            if(!"audio/mpeg".equals(contentType)) {
+                throw new InvalidAudioFileException();
+            }
+
             SongMetadataRecordDto dto =
                     new SongMetadataRecordDto();
             dto.setName(
@@ -74,5 +81,9 @@ public class ExtractMP3FileServiceImpl implements ExtractMP3FileService {
         } catch (NumberFormatException e) {
             throw new InvalidAudioFileException();
         }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }

@@ -2,6 +2,7 @@ package com.com.svysk.recource_processor.application;
 
 import com.svysk.openapi.dto.SongMetadataRecordDto;
 import com.svysk.resource_processor.application.ExtractMP3FileServiceImpl;
+import com.svysk.resource_processor.controller.error_handler.InvalidAudioFileException;
 import com.svysk.resource_processor.domain.SongDataRecord;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ import java.io.InputStream;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
@@ -48,5 +50,29 @@ class ExtractMP3FileServiceImplTest {
         assertThat(result.getAlbum()).isEqualTo("Test Album");
         assertThat(result.getDuration()).isEqualTo("00:07");
         assertThat(result.getYear()).isEqualTo("2025");
+        assertThat(result.getDuration()).matches("\\d{2}:\\d{2}");
+    }
+
+    @Test
+    void shouldThrowInvalidAudioFileExceptionWhenFileIsNotMp3() throws IOException {
+
+        //Arrange
+        byte[] invalidMP3Bytes;
+
+        try (InputStream input = getClass()
+                .getResourceAsStream(
+                        "/audio/invalid-sample-with-missed-tags.mp3.png"
+                )) {
+
+            assertNotNull(input, "Test MP3 file must exist");
+            invalidMP3Bytes = input.readAllBytes();
+        }
+
+        SongDataRecord dataRecord =
+                new SongDataRecord(123L, invalidMP3Bytes);
+
+        //Act & Assert
+        assertThatThrownBy(() -> service.extract(dataRecord))
+                .isInstanceOf(InvalidAudioFileException.class);
     }
 }
