@@ -4,6 +4,27 @@ server:
 spring:
   application:
     name: resource-processor
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:user}
+    password: ${RABBITMQ_PASSWORD:password}
+  cloud:
+    stream:
+      bindings:
+        resourceUploaded-in-0:
+          destination: resource.exchange
+          group: resource.uploaded.queue
+          content-type: application/json
+          consumer:
+            bindingRoutingKey: resource.uploaded
+            max-attempts: 1
+      rabbit:
+        bindings:
+          resourceUploaded-in-0:
+            consumer:
+              auto-bind-dlq: true
+
 
 eureka:
   client:
@@ -15,3 +36,9 @@ eureka:
   instance:
     prefer-ip-address: true
     lease-renewal-interval-in-seconds: 5
+
+song-srv:
+  url: ${SONG_SERVICE_URL:http://song-service}
+
+resource-srv:
+  url: ${RESOURCE_SERVICE_URL:http://resource-service}

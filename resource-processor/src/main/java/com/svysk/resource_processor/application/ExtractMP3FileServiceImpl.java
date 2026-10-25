@@ -22,7 +22,7 @@ public class ExtractMP3FileServiceImpl implements ExtractMP3FileService {
     @Override
     public SongMetadataRecordDto extract(SongDataRecord dataRecord) {
         try (InputStream inputStream =
-                     new ByteArrayInputStream(dataRecord.getData())) {
+                     new ByteArrayInputStream(dataRecord.data())) {
             Metadata metadata = new Metadata();
             Parser parser = new AutoDetectParser();
             parser.parse(
@@ -48,7 +48,7 @@ public class ExtractMP3FileServiceImpl implements ExtractMP3FileService {
             dto.setYear(
                     metadata.get(XMPDM.RELEASE_DATE)
             );
-            dto.setId(dataRecord.getId());
+            dto.setId(dataRecord.id());
             return dto;
         } catch (Exception e) {
             throw new InvalidAudioFileException();
