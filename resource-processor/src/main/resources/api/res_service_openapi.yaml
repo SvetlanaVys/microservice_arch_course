@@ -1,0 +1,36 @@
+openapi: 3.0.3
+info:
+  title: MP3 Resource API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /resources/{id}:
+    get:
+      summary: Retrieves the binary audio data of a resource
+      operationId: getAudio
+      tags:
+        - Resources
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the resource to retrieve
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Returns the audio bytes (MP3 file) for the specified resource
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: The provided ID is invalid (e.g., contains letters, decimals, is negative, or zero)
+        '404':
+          description: Resource with the specified ID does not exist
+        '500':
+          description: An error occured on the server
