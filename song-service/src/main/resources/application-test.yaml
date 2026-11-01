@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:song_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.tool.schema: DEBUG
+    org.hibernate.orm.jdbc: DEBUG
+
+eureka:
+  client:
+    enabled: false

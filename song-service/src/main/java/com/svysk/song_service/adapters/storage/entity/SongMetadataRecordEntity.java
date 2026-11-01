@@ -27,6 +27,6 @@ public class SongMetadataRecordEntity {
     @Column(nullable = false, length = 5)
     private String duration;
 
-    @Column(nullable = false, length = 4)
+    @Column(name = "release_year", nullable = false, length = 4)
     private String year;
 }
