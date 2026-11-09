@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS song_metadata_record
     artist           VARCHAR(100) NOT NULL,
     album            VARCHAR(100) NOT NULL,
     duration         VARCHAR(5)   NOT NULL,
-    year     VARCHAR(4)   NOT NULL
+    release_year     VARCHAR(4)   NOT NULL
 );

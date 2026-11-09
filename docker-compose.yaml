@@ -9,6 +9,7 @@ services:
     ports:
       - "${RESOURCE_DB_PORT}:5432"
     volumes:
+      - resource-db-data:/var/lib/postgresql/data
       - ./init-scripts/resource-db:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
@@ -26,6 +27,7 @@ services:
     ports:
       - "${SONG_DB_PORT}:5432"
     volumes:
+      - song-db-data:/var/lib/postgresql/data
       - ./init-scripts/song-db:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
@@ -207,3 +209,5 @@ services:
 volumes:
   minio_data:
   rabbitmq_data:
+  resource-db-data:
+  song-db-data:

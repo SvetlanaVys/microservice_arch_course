@@ -23,7 +23,7 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar api-gateway.jar
+COPY --from=build /app/target/*.jar api-gateway.jar
 
 EXPOSE 8085
 
