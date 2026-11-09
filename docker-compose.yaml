@@ -10,6 +10,12 @@ services:
       - "${RESOURCE_DB_PORT}:5432"
     volumes:
       - ./init-scripts/resource-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   song-db:
     image: postgres:17-alpine
@@ -21,6 +27,12 @@ services:
       - "${SONG_DB_PORT}:5432"
     volumes:
       - ./init-scripts/song-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   minio:
     image: cgr.dev/chainguard/minio:latest
@@ -34,6 +46,12 @@ services:
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   eureka-server:
     build:
@@ -41,6 +59,13 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8761:8761"
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8761 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   api-gateway:
     build:
       context: ./api-gateway
@@ -50,7 +75,14 @@ services:
     environment:
       EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8085 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
   resource-service:
     build:
@@ -76,11 +108,22 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     depends_on:
-      - resource-db
-      - minio
-      - eureka-server
-      - api-gateway
-      - rabbitmq
+      resource-db:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8080 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
 
   resource-processor:
     build:
@@ -99,16 +142,29 @@ services:
       SONG_SERVICE_URL: ${SONG_SERVICE_URL}
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5006"
     depends_on:
-      - eureka-server
-      - api-gateway
-      - resource-service
-      - song-service
-      - rabbitmq
+      resource-service:
+        condition: service_healthy
+      song-service:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8082 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
 
   song-service:
     build:
       context: ./song-service
       dockerfile: Dockerfile
+    deploy:
+      replicas: 2
     environment:
       SPRING_DATASOURCE_URL: ${SONG_DB_URL}
       SPRING_DATASOURCE_USERNAME: ${SONG_DB_USER}
@@ -116,9 +172,18 @@ services:
       EUREKA_SERVER_URL: ${EUREKA_SERVER_URL}
       RESOURCE_SERVICE_URL: ${RESOURCE_SERVICE_URL}
     depends_on:
-      - song-db
-      - eureka-server
-      - api-gateway
+      song-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      api-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 8081 || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
 
   rabbitmq:
     image: rabbitmq:4.3.6-management
@@ -132,6 +197,12 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   minio_data:

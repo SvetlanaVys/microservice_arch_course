@@ -7,11 +7,13 @@ WORKDIR /app
 
 COPY pom.xml .
 
-RUN mvn dependency:go-offline
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn dependency:go-offline -B
 
 COPY src ./src
 
-RUN mvn clean package -Dmaven.test.skip=true
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn clean package -DskipTests
 
 
 # =========================
@@ -21,8 +23,8 @@ FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=builder /app/target/*.jar api-gateway.jar
 
 EXPOSE 8085
 
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "api-gateway.jar"]
