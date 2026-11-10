@@ -8,6 +8,7 @@ import org.springframework.boot.webflux.error.ErrorWebExceptionHandler;
 import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.cloud.gateway.support.TimeoutException;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 
 @Component
+@Order(-2)
 @RequiredArgsConstructor
 public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
@@ -31,7 +33,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
 
         var response = exchange.getResponse();
 
-        if(response.isCommitted()) {
+        if (response.isCommitted()) {
             return Mono.error(ex);
         }
 
@@ -85,40 +87,36 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         return HttpStatus.INTERNAL_SERVER_ERROR;
     }
 
-    private String getUserFriendlyMessage(
-            HttpStatus status,
-            Throwable ex,
-            String service
-    ) {
-        String serviceName = service != null
-                ? service
-                : "requested service";
+    private String getUserFriendlyMessage(HttpStatus status, Throwable ex, String service) {
+        String readableService = formatServiceName(service);
 
-        if(hasCause(ex, ConnectException.class)) {
-            return serviceName + " is currently unavailable. "
-                    + "Please try again later.";
+        if (hasCause(ex, ConnectException.class) || hasCause(ex, WebClientException.class) || status == HttpStatus.SERVICE_UNAVAILABLE) {
+            return "We are having trouble connecting to the " + readableService + ". Our team is on it, please try again in a few moments.";
         }
 
-        if(hasCause(ex, TimeoutException.class)) {
-            return serviceName + " did not respond in time. "
-                    + "Please try again later.";
-        }
-
-        if(hasCause(ex, WebClientException.class)) {
-            return "Unable to establish communication with "
-                    + serviceName + ". Please try again later.";
+        if (hasCause(ex, TimeoutException.class) || status == HttpStatus.GATEWAY_TIMEOUT) {
+            return "The " + readableService + " is taking too long to respond. Please refresh the page or try again shortly.";
         }
 
         return switch (status) {
             case NOT_FOUND ->
-                "The requested endpoint was not found.";
-            case SERVICE_UNAVAILABLE ->
-                serviceName + " is currently unavailable.";
-            case GATEWAY_TIMEOUT ->
-                    serviceName + " did not respond in time.";
+                    "The page or resource you are looking for doesn't exist. Please check the URL and try again.";
+            case UNAUTHORIZED ->
+                    "Your session has expired or you don't have permission to view this. Please log in again.";
+            case FORBIDDEN ->
+                    "You don't have access to this square. If you believe this is a mistake, please contact support.";
+            case BAD_REQUEST -> "Something went wrong with the data sent. Please verify your input and try again.";
             default ->
-                "An unexpected error occurred while processing your request.";
+                    "Something went wrong on our end. Please try again later, or contact support if the issue persists.";
         };
+    }
+
+    private String formatServiceName(String service) {
+        if (service == null || service.isBlank() || "requested service".equalsIgnoreCase(service)) {
+            return "requested service";
+        }
+        String formatted = service.replace("-", " ").replace("_", " ").toLowerCase();
+        return formatted.substring(0, 1).toUpperCase() + formatted.substring(1);
     }
 
     private String getServiceName(ServerWebExchange exchange) {
@@ -126,13 +124,13 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
                 ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR
         );
 
-        if(route == null) {
+        if (route == null) {
             return null;
         }
 
         URI uri = route.getUri();
 
-        if("lb".equals(uri.getScheme())) {
+        if ("lb".equals(uri.getScheme())) {
             return uri.getHost();
         }
 
@@ -143,7 +141,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         Throwable current = ex;
 
         while (current != null) {
-            if(type.isInstance(current)) {
+            if (type.isInstance(current)) {
                 return true;
             }
 
@@ -157,7 +155,7 @@ public class GlobalErrorHandler implements ErrorWebExceptionHandler {
         Throwable current = ex;
 
         while (current != null) {
-            if(type.isInstance(current)) {
+            if (type.isInstance(current)) {
                 return current;
             }
 
