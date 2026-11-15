@@ -1,0 +1,148 @@
+
+openapi: 3.0.3
+
+info:
+  title: Storage Service API
+  description: API for managing storage configurations.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8083
+    description: Local development server
+
+tags:
+  - name: Storages
+    description: Storage management operations
+
+paths:
+  /storages:
+    post:
+      tags:
+        - Storages
+      summary: Create a storage
+      operationId: createStorage
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStorageRequest'
+            example:
+              storageType: STAGING
+              bucket: staging-bucket
+              path: staging/
+      responses:
+        '201':
+          description: Storage successfully created
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int64
+              example: 1
+        '400':
+          description: Invalid request
+        '409':
+          description: Storage with conflicting path already exists
+
+    get:
+      tags:
+        - Storages
+      summary: Get all storages
+      operationId: getStorages
+      responses:
+        '200':
+          description: List of storages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StorageResponse'
+              example:
+                - id: 1
+                  storageType: STAGING
+                  bucket: staging-bucket
+                  path: staging/
+                - id: 2
+                  storageType: PERMANENT
+                  bucket: permanent-bucket
+                  path: permanent/
+
+    delete:
+      tags:
+        - Storages
+      summary: Delete storages by IDs
+      operationId: deleteStorages
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Comma-separated list of storage IDs. Maximum length is 199 characters.
+          schema:
+            type: string
+            maxLength: 199
+            example: "1,2,3"
+      responses:
+        '200':
+          description: IDs of successfully deleted storages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                  format: int64
+              example:
+                - 1
+                - 2
+        '400':
+          description: Invalid ID list or CSV string exceeds maximum length
+
+components:
+  schemas:
+    CreateStorageRequest:
+      type: object
+      required:
+        - storageType
+        - bucket
+        - path
+      properties:
+        storageType:
+          type: string
+          enum:
+            - STAGING
+            - PERMANENT
+          example: STAGING
+        bucket:
+          type: string
+          minLength: 1
+          example: staging-bucket
+        path:
+          type: string
+          minLength: 1
+          example: staging/
+
+    StorageResponse:
+      type: object
+      required:
+        - id
+        - storageType
+        - bucket
+        - path
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        storageType:
+          type: string
+          enum:
+            - STAGING
+            - PERMANENT
+        bucket:
+          type: string
+          example: staging-bucket
+        path:
+          type: string
+          example: staging/
