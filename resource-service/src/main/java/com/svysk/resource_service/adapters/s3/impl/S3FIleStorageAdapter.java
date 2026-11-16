@@ -6,26 +6,20 @@ import org.springframework.stereotype.Component;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 
 @Component
 public class S3FIleStorageAdapter implements FileStorageService {
 
     private final S3Client s3Client;
-    private final String bucket;
 
-    public S3FIleStorageAdapter(S3Client s3Client,
-                                @Value("${storage.s3.bucket}") String bucket) {
+    public S3FIleStorageAdapter(S3Client s3Client) {
         this.s3Client = s3Client;
-        this.bucket = bucket;
     }
 
     @Override
-    public void upload(String key, byte[] content, String contentType) {
+    public void upload(String bucket, String key, byte[] content, String contentType) {
         PutObjectRequest request = PutObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
@@ -36,7 +30,7 @@ public class S3FIleStorageAdapter implements FileStorageService {
     }
 
     @Override
-    public byte[] download(String key) {
+    public byte[] download(String bucket, String key) {
         GetObjectRequest request = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
@@ -48,12 +42,26 @@ public class S3FIleStorageAdapter implements FileStorageService {
     }
 
     @Override
-    public void delete(String key) {
+    public void delete(String bucket, String key) {
         DeleteObjectRequest request = DeleteObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
                 .build();
 
         s3Client.deleteObject(request);
+    }
+
+    @Override
+    public void move(String sourceBucket, String sourceKey, String targetBucket, String targetKey) {
+
+        CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+                .sourceBucket(sourceBucket)
+                .sourceKey(sourceKey)
+                .destinationBucket(targetBucket)
+                .destinationKey(targetKey)
+                .build();
+
+        s3Client.copyObject(copyRequest);
+        delete(sourceBucket, sourceKey);
     }
 }

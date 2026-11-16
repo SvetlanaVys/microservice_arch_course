@@ -101,6 +101,11 @@ paths:
 
 components:
   schemas:
+    StorageType:
+      type: string
+      enum:
+        - STAGING
+        - PERMANENT
     CreateStorageRequest:
       type: object
       required:
@@ -109,11 +114,7 @@ components:
         - path
       properties:
         storageType:
-          type: string
-          enum:
-            - STAGING
-            - PERMANENT
-          example: STAGING
+          $ref: '#/components/schemas/StorageType'
         bucket:
           type: string
           minLength: 1
@@ -136,10 +137,7 @@ components:
           format: int64
           example: 1
         storageType:
-          type: string
-          enum:
-            - STAGING
-            - PERMANENT
+          $ref: '#/components/schemas/StorageType'
         bucket:
           type: string
           example: staging-bucket

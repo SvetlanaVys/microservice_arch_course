@@ -51,3 +51,6 @@ storage:
 
 song-srv:
   url: ${SONG_SERVICE_URL:http://song-service}
+
+storage-srv:
+  url: ${STORAGE_SERVICE_URL:http://storage-service}
