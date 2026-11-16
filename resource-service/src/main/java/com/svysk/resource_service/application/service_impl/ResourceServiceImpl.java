@@ -142,4 +142,41 @@ public class ResourceServiceImpl implements ResourceService {
         }
         return resourceIds;
     }
+
+    @Override
+    public void handleResourceProcessed(Long resourceId) {
+
+        // 1. Locating the resource in the database
+        MP3Resource resource = repository.findById(resourceId)
+                .orElseThrow(() ->
+                        new AudioResourceNotFoundException(resourceId));
+
+        // 1. Get PERMANENT configuration
+        StorageResponse permanentStorage =
+                storageService.getStorageByTypes(StorageType.PERMANENT);
+
+
+        // 3. Remember the current location
+        String sourceBucket = resource.getBucketName();
+        String sourceKey = resource.getFilePath();
+
+        // 4. Forging a new path
+        String targetKey = permanentStorage.getPath()
+                + UUID.randomUUID() + ".mp3";
+
+        // 5. Moving the file to MinIO
+        s3FIleStorage.move(
+                sourceBucket,
+                sourceKey,
+                permanentStorage.getBucket(),
+                targetKey
+        );
+
+        // 6. ОUpdating information in the database
+        resource.setBucketName(permanentStorage.getBucket());
+        resource.setFilePath(targetKey);
+        resource.setStatus(StorageType.PERMANENT);
+
+        repository.save(resource);
+    }
 }

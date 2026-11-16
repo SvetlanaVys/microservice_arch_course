@@ -29,6 +29,13 @@ spring:
           content-type: application/json
           producer:
             routingKeyExpression: "'resource.uploaded'"
+        resourceProcessed-in-0:
+          destination: resource.exchange
+          group: resource.produssed.queue
+          content-type: application/json
+          consumer:
+            bindingRoutingKey: resource.produssed
+            max-attempts: 1
 
 eureka:
   client:

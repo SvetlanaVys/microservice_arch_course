@@ -26,6 +26,7 @@ public class ResourceUploadedConsumer {
     private final ResourcesApi resourcesApi;
     private final SongsApi songsApi;
     private final ExtractMP3FileServiceImpl extractMP3Service;
+    private final ResourceMessagePublisher resourceMessagePublisher;
     private final Cache<Long, Boolean> processedResourcesCache;
 
     @Bean
@@ -72,5 +73,8 @@ public class ResourceUploadedConsumer {
 
         log.debug("Create song metadata wit resource id: {}...", resourceId);
         songsApi.createSong(metadataDto, RESOURCE_SERVICE);
+
+        // Notify Resource Service about successful processing
+        resourceMessagePublisher.publishResourceProcessed(resourceId);
     }
 }
