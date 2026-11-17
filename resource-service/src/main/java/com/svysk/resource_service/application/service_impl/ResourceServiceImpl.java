@@ -3,10 +3,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.svysk.openapi.client.SongsApi;
+import com.svysk.openapi.song.client.SongsApi;
 import com.svysk.resource_service.adapters.s3.impl.S3FIleStorageAdapter;
 import com.svysk.resource_service.application.port.out.ResourceEventPublisher;
 import com.svysk.resource_service.controller.error_handler.ResourceIdsTooLongExcepion;
+import com.svysk.resource_service.domain.StorageResponse;
+import com.svysk.resource_service.domain.StorageType;
+import com.svysk.resource_service.domain.service.StorageClientService;
 import org.springframework.stereotype.Service;
 
 import com.svysk.resource_service.controller.error_handler.AudioResourceNotFoundException;
@@ -27,6 +30,7 @@ public class ResourceServiceImpl implements ResourceService {
     private final ResourceRepository repository;
     private final S3FIleStorageAdapter s3FIleStorage;
     private final ResourceEventPublisher eventPublisher;
+    private final StorageClientService storageService;
     private final SongsApi songsApi;
 
     @Override
@@ -41,7 +45,7 @@ public class ResourceServiceImpl implements ResourceService {
             );
 
         if(!resource.getFilePath().isBlank()) {
-            byte[] fileData = s3FIleStorage.download(resource.getFilePath());
+            byte[] fileData = s3FIleStorage.download(resource.getBucketName(), resource.getFilePath());
             resource.setData(fileData);
         }
 
@@ -56,27 +60,30 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Long upload(MP3Resource audioFile) {
 
-        String filePath = "mp3/" + UUID.randomUUID() + ".mp3";
+        // 1. Get STAGING configuration
+        StorageResponse storageResponse =
+                storageService.getStorageByTypes(StorageType.STAGING);
+
+        // 2. Create unique path to file
+        String filePath = storageResponse.getPath() + UUID.randomUUID() + ".mp3";
+
+        // 3. Upload file to STAGING bucket
         s3FIleStorage.upload(
+                storageResponse.getBucket(),
                 filePath,
                 audioFile.getData(),
                 audioFile.getContentType()
         );
 
         audioFile.setFilePath(filePath);
-
-
-        /*
-        TODO: The service call has been commented out to comply with the task requirements
-        SongMetadataRecordDto recordDto = audioMetadataService.extract(audioFile.getData());
-        recordDto.setId(createdMP3ResourceId)
-        songsApi.createSong(recordDto, RESOURCE_SERVICE);
-        */
+        audioFile.setBucketName(storageResponse.getBucket());
+        audioFile.setStatus(storageResponse.getStorageType());
 
         Long resourceId = repository.save(audioFile)
                 .map(MP3Resource::getId)
                 .orElseThrow(() -> new IllegalStateException("Failed to save audio file"));
 
+        // 5. Send for processing
         eventPublisher.publishResourceUploaded(resourceId);
 
         return resourceId;
@@ -94,7 +101,7 @@ public class ResourceServiceImpl implements ResourceService {
             String filePath = resource.getFilePath();
 
             if(filePath != null && !filePath.isBlank()) {
-                s3FIleStorage.delete(resource.getFilePath());
+                s3FIleStorage.delete(resource.getBucketName(), resource.getFilePath());
             }
 
             existingIds.add(resource.getId());
@@ -134,5 +141,42 @@ public class ResourceServiceImpl implements ResourceService {
             }
         }
         return resourceIds;
+    }
+
+    @Override
+    public void handleResourceProcessed(Long resourceId) {
+
+        // 1. Locating the resource in the database
+        MP3Resource resource = repository.findById(resourceId)
+                .orElseThrow(() ->
+                        new AudioResourceNotFoundException(resourceId));
+
+        // 1. Get PERMANENT configuration
+        StorageResponse permanentStorage =
+                storageService.getStorageByTypes(StorageType.PERMANENT);
+
+
+        // 3. Remember the current location
+        String sourceBucket = resource.getBucketName();
+        String sourceKey = resource.getFilePath();
+
+        // 4. Forging a new path
+        String targetKey = permanentStorage.getPath()
+                + UUID.randomUUID() + ".mp3";
+
+        // 5. Moving the file to MinIO
+        s3FIleStorage.move(
+                sourceBucket,
+                sourceKey,
+                permanentStorage.getBucket(),
+                targetKey
+        );
+
+        // 6. ОUpdating information in the database
+        resource.setBucketName(permanentStorage.getBucket());
+        resource.setFilePath(targetKey);
+        resource.setStatus(StorageType.PERMANENT);
+
+        repository.save(resource);
     }
 }

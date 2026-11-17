@@ -19,11 +19,18 @@ spring:
           consumer:
             bindingRoutingKey: resource.uploaded
             max-attempts: 1
+        resourceProcessed-out-0:
+          destination: resource.exchange
+          content-type: application/json
+
       rabbit:
         bindings:
           resourceUploaded-in-0:
             consumer:
               auto-bind-dlq: true
+          resourceProcessed-out-0:
+            producer:
+              routing-key-expression: "'resource.processed'"
 
 
 eureka:

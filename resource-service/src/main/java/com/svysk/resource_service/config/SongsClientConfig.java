@@ -1,13 +1,11 @@
 package com.svysk.resource_service.config;
 
-import com.svysk.openapi.ApiClient;
-import com.svysk.openapi.client.SongsApi;
+import com.svysk.openapi.song.ApiClient;
+import com.svysk.openapi.song.client.SongsApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestClient;
 
 @Configuration
@@ -17,18 +15,7 @@ public class SongsClientConfig {
     String url;
 
     @Bean
-    @Primary
-    public RestClient.Builder restClientBuilder() {
-        return RestClient.builder();
-    }
-
-    @Bean
-    @LoadBalanced
-    public RestClient.Builder loadBalancedRestClientBuilder() {
-        return RestClient.builder();
-    }
-
-    @Bean
+    @Qualifier("songRestClient")
     public RestClient restClient(
             @Qualifier("loadBalancedRestClientBuilder")
             RestClient.Builder restClientBuilder) {
@@ -39,7 +26,9 @@ public class SongsClientConfig {
     }
 
     @Bean
-    public ApiClient apiClient(RestClient restClient) {
+    @Qualifier("songRestClient")
+    public ApiClient apiClient(
+            @Qualifier("songRestClient") RestClient restClient) {
         ApiClient apiClient = new ApiClient(restClient);
         apiClient.setBasePath(url);
 
@@ -47,7 +36,8 @@ public class SongsClientConfig {
     }
 
     @Bean
-    public SongsApi songsApi(ApiClient apiClient) {
+    public SongsApi songsApi(
+            @Qualifier("songRestClient") ApiClient apiClient) {
         return new SongsApi(apiClient);
     }
 }

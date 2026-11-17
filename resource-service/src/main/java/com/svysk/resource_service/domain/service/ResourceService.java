@@ -13,4 +13,6 @@ public interface ResourceService {
     Long upload(MP3Resource audioFile);
 
     List<Long> deleteByIds(String id);
+    
+    void handleResourceProcessed(Long resourceId);
 }

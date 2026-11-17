@@ -9,8 +9,10 @@ public class MP3Resource {
 
     private Long id;
     private String contentType;
-    private String filePath;
     private Long size;
+    private String bucketName;
+    private String filePath;
     private byte[] data;
     private LocalDateTime createdAt;
+    private StorageType status;
 }

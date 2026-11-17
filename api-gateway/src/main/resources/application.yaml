@@ -18,6 +18,10 @@ spring:
               uri: lb://resource-processor
               predicates:
                 - Path=/processor/**
+            - id: storage-service
+              uri: lb://storage-service
+              predicates:
+                - Path=/storages/**
 server:
   port: 8085
 eureka:
