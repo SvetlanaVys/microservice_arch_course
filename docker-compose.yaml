@@ -139,6 +139,10 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      STORAGE_STAGING_BUCKET: staging-bucket
+      STORAGE_STAGING_PATH: staging/
+      STORAGE_PERMANENT_BUCKET: permanent-bucket
+      STORAGE_PERMANENT_PATH: permanent/
       JAVA_TOOL_OPTIONS: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
     depends_on:
       resource-db:
