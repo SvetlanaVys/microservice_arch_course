@@ -12,4 +12,6 @@ public interface StorageRepository {
     List<Storage> findByIds(List<Long> storageIds);
 
     void deleteByIds(List<Long> existingIds);
+
+    boolean existsByBucketAndPath(String bucket, String path);
 }

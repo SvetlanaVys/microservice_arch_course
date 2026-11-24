@@ -32,14 +32,21 @@ paths:
               bucket: staging-bucket
               path: staging/
       responses:
-        '201':
+        '200':
           description: Storage successfully created
           content:
             application/json:
               schema:
-                type: integer
-                format: int64
-              example: 1
+                type: object
+                required:
+                  - id
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    example: 1
+              example:
+                id: 1
         '400':
           description: Invalid request
         '409':

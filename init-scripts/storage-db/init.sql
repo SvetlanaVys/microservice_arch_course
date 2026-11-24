@@ -1,9 +1,14 @@
+
 CREATE TABLE IF NOT EXISTS storages
 (
     id               BIGINT PRIMARY KEY,
     storage_type     VARCHAR(50) NOT NULL,
     bucket_name      VARCHAR(255) NOT NULL,
     key_prefix       VARCHAR(255) NOT NULL,
+
+    CONSTRAINT uk_storages_bucket_key_prefix
+        UNIQUE (bucket_name, key_prefix),
+
     CHECK (storage_type IN ('STAGING', 'PERMANENT'))
 );
 

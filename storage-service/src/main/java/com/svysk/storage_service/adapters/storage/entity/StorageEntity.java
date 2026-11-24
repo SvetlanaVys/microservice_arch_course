@@ -6,7 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 @Entity
-@Table(name = "storages")
+@Table(
+    name = "storages",
+    uniqueConstraints = {
+        @UniqueConstraint(
+            name = "uk_storages_bucket_key_prefix",
+            columnNames = {"bucket_name", "key_prefix"}
+        )
+    }
+)
 @Data
 @ToString
 @RequiredArgsConstructor

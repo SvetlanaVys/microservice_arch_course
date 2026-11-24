@@ -1,5 +1,7 @@
 package com.svysk.storage_service.controller.error_handler;
 
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -127,4 +129,39 @@ public class GlobalExceptionHandler {
                 .status(ex.getStatusCode())
                 .body(ex.getResponseBodyAsString());
     }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity<ErrorResponse> handleValidationException(
+        MethodArgumentNotValidException ex
+) {
+    String message = ex.getBindingResult()
+            .getAllErrors()
+            .stream()
+            .map(error -> error.getDefaultMessage())
+            .collect(Collectors.joining("; "));
+
+    ErrorResponse error = new ErrorResponse(
+            HttpStatus.BAD_REQUEST,
+            message
+    );
+
+    return ResponseEntity
+            .badRequest()
+            .body(error);
+}
+
+@ExceptionHandler(HttpMessageNotReadableException.class)
+public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException ex
+) {
+
+    ErrorResponse error = new ErrorResponse(
+            HttpStatus.BAD_REQUEST,
+            "Invalid request body: malformed JSON or invalid field value"
+    );
+
+    return ResponseEntity
+            .badRequest()
+            .body(error);
+}
 }
