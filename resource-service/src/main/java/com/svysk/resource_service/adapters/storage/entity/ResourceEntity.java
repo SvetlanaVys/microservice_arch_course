@@ -2,12 +2,7 @@ package com.svysk.resource_service.adapters.storage.entity;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -27,10 +22,17 @@ public class ResourceEntity {
     @Column(nullable = false)
     private Long size;
 
+    @Column(nullable = false)
+    private String bucketName;
+
     @Column(name = "file_path", nullable = false)
     private String filePath;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private StorageType status;
 }
 

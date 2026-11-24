@@ -144,6 +144,22 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 			<artifactId>spring-cloud-starter-contract-verifier</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- Circuit Breaker -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aspectj</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-spring-boot4</artifactId>
+			<version>2.4.0</version>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -289,33 +305,54 @@ https://maven.apache.org/xsd/maven-4.0.0.xsd">
 				<groupId>org.openapitools</groupId>
 				<artifactId>openapi-generator-maven-plugin</artifactId>
 				<version>7.24.0</version>
+				<configuration>
+					<generatorName>java</generatorName>
+					<library>restclient</library>
+					<modelNameSuffix>Dto</modelNameSuffix>
+					<generateApis>true</generateApis>
+					<generateModels>true</generateModels>
+					<generateApiTests>false</generateApiTests>
+					<generateModelTests>false</generateModelTests>
+					<configHelp>false</configHelp>
+					<configOptions>
+						<sourceFolder>src/main/java</sourceFolder>
+						<useBeanValidation>true</useBeanValidation>
+						<performBeanValidation>true</performBeanValidation>
+						<dateLibrary>java8</dateLibrary>
+						<useOptional>true</useOptional>
+						<useJakartaEe>true</useJakartaEe>
+					</configOptions>
+				</configuration>
+
 				<executions>
 					<execution>
+						<id>buildSongClient</id>
 						<goals>
 							<goal>generate</goal>
 						</goals>
-						<id>buildClient</id>
 						<configuration>
 							<inputSpec>${project.basedir}/src/main/resources/api/song_openapi.yaml</inputSpec>
-							<generatorName>java</generatorName>
-							<library>restclient</library>
-							<modelNameSuffix>Dto</modelNameSuffix>
-							<generateApis>true</generateApis>
-							<generateModels>true</generateModels>
-							<generateApiTests>false</generateApiTests>
-							<generateModelTests>false</generateModelTests>
-							<configHelp>false</configHelp>
-							<output>${project.build.directory}/generated-sources/openapi-client</output>
+							<output>${project.build.directory}/generated-sources/song-client</output>
 							<configOptions>
-								<sourceFolder>src/main/java</sourceFolder>
-								<useBeanValidation>true</useBeanValidation>
-								<performBeanValidation>true</performBeanValidation>
-								<modelPackage>com.svysk.openapi.dto</modelPackage>
-								<apiPackage>com.svysk.openapi.client</apiPackage>
-								<invokerPackage>com.svysk.openapi</invokerPackage>
-								<dateLibrary>java8</dateLibrary>
-								<useOptional>true</useOptional>
-								<useJakartaEe>true</useJakartaEe>
+								<modelPackage>com.svysk.openapi.song.dto</modelPackage>
+								<apiPackage>com.svysk.openapi.song.client</apiPackage>
+								<invokerPackage>com.svysk.openapi.song</invokerPackage>
+							</configOptions>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>buildStorageClient</id>
+						<goals>
+							<goal>generate</goal>
+						</goals>
+						<configuration>
+							<inputSpec>${project.basedir}/src/main/resources/api/storage_openapi.yaml</inputSpec>
+							<output>${project.build.directory}/generated-sources/storage-client</output>
+							<configOptions>
+								<modelPackage>com.svysk.openapi.storage.dto</modelPackage>
+								<apiPackage>com.svysk.openapi.storage.client</apiPackage>
+								<invokerPackage>com.svysk.openapi.storage</invokerPackage>
 							</configOptions>
 						</configuration>
 					</execution>
