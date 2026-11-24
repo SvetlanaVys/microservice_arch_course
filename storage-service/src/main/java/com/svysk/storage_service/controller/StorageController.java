@@ -1,6 +1,7 @@
 package com.svysk.storage_service.controller;
 
 import com.svysk.openapi.api.StoragesApi;
+import com.svysk.openapi.dto.CreateStorage200ResponseDto;
 import com.svysk.openapi.dto.CreateStorageRequestDto;
 import com.svysk.openapi.dto.StorageResponseDto;
 import com.svysk.storage_service.controller.mapper.StorageMapper;
@@ -22,12 +23,16 @@ public class StorageController implements StoragesApi {
     private final StorageMapper mapper;
 
     @PostMapping
-    public ResponseEntity<Long> createStorage(
+    public ResponseEntity<CreateStorage200ResponseDto> createStorage(
             @Valid @RequestBody CreateStorageRequestDto request) {
 
         Long id = storageService.createStorage(mapper.toStorage(request));
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(id);
+        CreateStorage200ResponseDto response =
+                new CreateStorage200ResponseDto();
+        response.setId(id);
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping

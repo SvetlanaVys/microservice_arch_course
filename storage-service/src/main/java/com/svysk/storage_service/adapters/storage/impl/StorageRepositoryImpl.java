@@ -48,4 +48,9 @@ public class StorageRepositoryImpl implements StorageRepository {
     public void deleteByIds(List<Long> existingIds) {
         dStorageDao.deleteAllById(existingIds);
     }
+
+    @Override
+    public boolean existsByBucketAndPath(String bucket, String path) {
+        return dStorageDao.existsByBucketAndPath(bucket, path);
+    }
 }

@@ -1,12 +1,16 @@
 package com.svysk.storage_service.application;
 
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import com.svysk.storage_service.controller.error_handler.InvalidResourceIdsFormatException;
 import com.svysk.storage_service.controller.error_handler.ResourceIdsTooLongExcepion;
 import com.svysk.storage_service.domain.Storage;
 import com.svysk.storage_service.domain.repository.StorageRepository;
 import com.svysk.storage_service.domain.service.StorageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +22,27 @@ public class StorageServiceImpl implements StorageService {
     private final StorageRepository repository;
 
     @Override
+    @Transactional
     public Long createStorage(Storage storage) {
-        return repository.createStorage(storage);
+
+        if (repository.existsByBucketAndPath(
+            storage.getBucket(),
+            storage.getPath())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Storage with this bucket and path already exists"
+            );
+        }
+
+        try {
+            return repository.createStorage(storage);
+        } catch (DataIntegrityViolationException ex) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Storage with this bucket and path already exists",
+                    ex
+            );
+        }
     }
 
     @Override
